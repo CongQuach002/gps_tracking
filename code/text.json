@@ -1,0 +1,49 @@
+<script type="application/ld+json">
+    {
+        "@context": "https://schema.org/",
+        "@graph": [{
+            "@type": "website",
+            "@id": "https://vietnix.vn/#website",
+            "name": "Vietnix",
+            "url": "https://vietnix.vn",
+            "description": "Website vietnix.vn là website thuộc sở hữu của công ty Cổ Phần giải pháp và công nghệ Vietnix, nơi chia sẻ những kiến thức hay và bổ ích về công nghệ thông tin và kiến thức về Digital Marketing, Vietnix cung cấp các dịch vụ lưu trữ web như: Hosting, Cloud VPS, Máy chủ (Server), Thuê chỗ đặt máy chủ, SSL, Tên miền (Domain) và dịch vụ Firewall Anti DDoS, chống tấn công DDoS",
+            "publisher": {
+                "@id": "kg:/g/11g9v_j1yp"
+            },
+            "author": {
+                "@id": "kg:/g/11g9v_j1yp"
+            },
+            "copyrightHolder": {
+                "@id": "kg:/g/11g9v_j1yp"
+            },
+            "about": [{
+                "@id": "kg:/m/014pz4",
+                "name": "Hosting",
+                "url": "https://vietnix.vn/hosting-la-gi/"
+            }, {
+                "@id": "kg:/m/02phxk",
+                "name": "VPS",
+                "url": "https://vietnix.vn/vps-la-gi/"
+            }, {
+                "@id": "kg:/g/120x72xh",
+                "name": "Máy chủ",
+                "url": "https://vietnix.vn/server-la-gi/"
+                {
+                "@id": "kg:/m/0j7hw0d",
+                "name": "Firewall Anti DDoS",
+                "url": "https://vietnix.vn/ddos-la-gi/"
+            }, {
+                "@id": "kg:/m/0j7hw0d",
+                "name": "Domain",
+                "url": "https://vietnix.vn/ddos-la-gi/"
+            }, {
+                "@id": "kg:/m/0j7hw0d",
+                "name": "SSL",
+                "url": "https://vietnix.vn/ddos-la-gi/"
+            }, {
+                "@id": "kg:/m/0j7hw0d",
+                "name": "Chỗ đặt máy chủ",
+                "url": "https://vietnix.vn/ddos-la-gi/"
+            },]
+ 
+        }, {

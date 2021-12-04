@@ -1,0 +1,162 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <WiFiManager.h>
+#include <SoftwareSerial.h>
+#include <Wire.h>
+#include <NTPClient.h>
+#include <WiFiUdp.h>
+
+// nhip tim
+
+#include <Adafruit_ADXL345_U.h>
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+Adafruit_ADXL345_Unified accel = Adafruit_ADXL345_Unified();
+float a;
+// gps
+#include <TinyGPS++.h>
+long last = 0;
+long last2 = 0;
+TinyGPSPlus gps;
+#define RXPin 2
+#define TXPin 15
+static const uint32_t GPSBaud = 9600;
+SoftwareSerial ss(RXPin, TXPin);
+unsigned int move_index = 1;
+//firebase
+#include <FirebaseESP32.h>
+#define FIREBASE_HOST "vann-53570.firebaseio.com"                // ten host cua firebase
+#define FIREBASE_AUTH "LC6fDYVqNO7VVBfoymADdWtLZVl6jr6WVJxhONrF" // ma dôi cái này nữa
+FirebaseData firebaseData;                                       // firebase datb
+FirebaseJson json;
+FirebaseJson json2;
+// time
+
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org", 7 * 3600);
+String formattedDate;
+String dayStamp;
+String timeStamp;
+
+void hello();   // ham cho oled
+void ADXL345(); // ham cho gia toc
+void checkGPS();
+void vitri();
+void setup()
+{
+
+  Wire.begin(22, 21);
+  WiFi.mode(WIFI_STA);
+  Serial.begin(9600);
+
+  WiFiManager wm;
+  bool res;
+  res = wm.autoConnect("ITS"); // đặt tên wifi // nếu đặt có mật khẩu sẽ có dạng sau  // res = wm.autoConnect("Smarthome","password"); // password protected ap
+
+  if (!res)
+  {
+    Serial.println("Failed to connect");
+  }
+  else
+  {
+    //if you get here you have connected to the WiFi
+    Serial.println("Connected...yeey :)");
+  }
+  // ADXL345
+  // if (!accel.begin(0x53))
+  // {
+  //   Serial.println("No ADXL345 sensor detected.");
+  //   while (1)
+  //     ;
+  // }
+
+  ss.begin(9600);
+  timeClient.begin();
+
+  Firebase.begin(FIREBASE_HOST, FIREBASE_AUTH);
+  last = millis();
+  last2 = millis();
+}
+void loop()
+{
+  timeClient.update();
+   //Firebase.setFloat(firebaseData, "/ecall", a);
+
+  // ADXL345();
+checkGPS();
+  timeStamp = timeClient.getFormattedTime();
+  formattedDate = timeClient.getFormattedDate();
+  int splitT = formattedDate.indexOf("T");
+  dayStamp = formattedDate.substring(0, splitT);
+  Serial.println(dayStamp);
+  Serial.println(timeStamp);
+
+  if (millis() - last >= 50000)
+  {
+    vitri();
+
+    last = millis();
+  }
+  if (millis() - last2 >= 1000)
+  {
+    Firebase.setFloat(firebaseData, "/GPS4/LA", gps.location.lat());
+    Firebase.setFloat(firebaseData, "/GPS4/LO", gps.location.lng());
+    Firebase.setString(firebaseData, "/GPS4/TIME", timeStamp);
+    Firebase.setFloat(firebaseData, "/GPS4/SP", gps.speed.kmph());
+    Firebase.setFloat(firebaseData, "/ecall", a);
+    last2 = millis();
+  }
+  while (ss.available() > 0)
+  {
+    if (gps.encode(ss.read()))
+    {
+      Serial.println("GPS");
+    }
+  }
+}
+
+
+// cam bien gia toc
+void ADXL345()
+{
+  sensors_event_t event;
+  accel.getEvent(&event);
+
+  a = sqrt(event.acceleration.x * event.acceleration.x * 0.0078 + event.acceleration.y * event.acceleration.y * 0.0078 + event.acceleration.z * event.acceleration.z * 0.0078);
+  if (a > 1.2)
+  {
+    json2.set("Latitude", gps.location.lat());
+    json2.set("Longitude", gps.location.lng());
+    json2.set("Time", timeStamp);
+    json2.set("Date", dayStamp);
+    json2.set("Speed", gps.speed.kmph());
+Firebase.setFloat(firebaseData, "/ecall", a);
+    Firebase.pushJSON(firebaseData, "/GPS2/", json2);
+  }    
+  Serial.print("giatria");
+  Serial.println(a);
+}
+
+void checkGPS()
+{
+  if (gps.charsProcessed() < 10)
+  {
+    Serial.println(F("No GPS detected: check wiring."));
+  }
+}
+void vitri()
+{
+  if (gps.location.isValid())
+  {
+    float latitude = (gps.location.lat()); //Storing the Lat. and Lon.
+    float longitude = (gps.location.lng());
+    Serial.println(latitude);
+      Serial.println(longitude);
+    json.set("Latitude", latitude);
+    json.set("Longitude", longitude);
+    json.set("Time", timeStamp);
+    json.set("Date", dayStamp);
+    json.set("Speed", gps.speed.kmph());
+    Firebase.pushJSON(firebaseData, "/GPS3/", json);
+  }
+}
